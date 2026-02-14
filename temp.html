@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temperature Converter</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    /* Main card container */
+    .converter-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .converter-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Header */
+    .card-header {
+      margin-bottom: 2rem;
+    }
+
+    .card-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-subtitle {
+      color: #666;
+      font-size: 1rem;
+    }
+
+    /* Input group */
+    .input-group {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .temp-input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .temp-input {
+      flex: 1;
+      padding: 1rem 1.25rem;
+      font-size: 1.5rem;
+      border: 4px solid #393b3d;
+      border-radius: 16px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .temp-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .unit-select {
+      padding: 1rem 1.25rem;
+      font-size: 1.1rem;
+      border: 1.5px solid #27292b;
+      border-radius: 16px;
+      background: #f8f9fa;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 100px;
+    }
+
+    .unit-select:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Convert button */
+    .convert-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 1.25rem 3rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      width:100%;
+      margin-bottom: 2rem;
+    }
+
+    .convert-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .convert-btn:active {
+      transform: translateY(0);
+    }
+
+    .convert-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Result section */
+    .result-section {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-top: 1rem;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .result-section.converted {
+      animation: pulse 0.6s ease-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .result-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .result-unit {
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    .no-value {
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+
+      .converter-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .card-title {
+        font-size: 1.75rem;
+      }
+
+      .temp-input-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .temp-input {
+        font-size: 1.375rem;
+      }
+
+      .result-value {
+        font-size: 1.75rem;
+      }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      .converter-card {
+        background: rgba(26, 32, 44, 0.95);
+        color: #e2e8f0;
+      }
+
+      .temp-input,
+      .unit-select {
+        background: #1e293b;
+        border-color: #334155;
+        color: #e2e8f0;
+      }
+
+      .card-subtitle {
+        color: #94a3b8;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Main converter card -->
+  <main class="converter-card" role="main">
+    <!-- Card header -->
+    <header class="card-header">
+      <h1 class="card-title">Temperature Converter</h1>
+      <p class="card-subtitle">Enter a value and select unit, then click Convert</p>
+    </header>
+
+    <!-- Input form -->
+    <form class="input-group" aria-labelledby="converter-heading">
+      <div class="temp-input-wrapper">
+        <!-- Temperature input field -->
+        <input 
+          type="number" 
+          class="temp-input" 
+          placeholder="Enter temperature" 
+          aria-label="Temperature value"
+          step="0.01"
+          min="-273.15"
+        >
+        
+        <!-- Unit selection dropdown -->
+        <select class="unit-select" aria-label="Select input unit">
+          <option value="celsius">°C</option>
+          <option value="fahrenheit">°F</option>
+          <option value="kelvin">K</option>
+        </select>
+      </div>
+      
+      <!-- Convert button -->
+      <button type="button" class="convert-btn" aria-label="Convert temperature">
+        Convert
+      </button>
+    </form>
+
+    <!-- Result display section -->
+    <section class="result-section" aria-live="polite" role="status">
+      <div class="result-label">Converted Result</div>
+      <div class="result-value no-value" aria-label="conversion result">--</div>
+      <div class="result-unit" aria-label="result unit">--</div>
+    </section>
+  </main>
+
+  <script>
+    // Get DOM elements
+    const tempInput = document.querySelector('.temp-input');
+    const unitSelect = document.querySelector('.unit-select');
+    const convertBtn = document.querySelector('.convert-btn');
+    const resultSection = document.querySelector('.result-section');
+    const resultValue = document.querySelector('.result-value');
+    const resultUnit = document.querySelector('.result-unit');
+
+    // Conversion functions
+    const convertTemp = (value, fromUnit, toUnit) => {
+      // Convert to Celsius first
+      let celsius;
+      
+      switch(fromUnit) {
+        case 'celsius':
+          celsius = parseFloat(value);
+          break;
+        case 'fahrenheit':
+          celsius = (parseFloat(value) - 32) * 5/9;
+          break;
+        case 'kelvin':
+          celsius = parseFloat(value) - 273.15;
+          break;
+      }
+      
+      // Convert from Celsius to target unit
+      switch(toUnit) {
+        case 'celsius':
+          return celsius;
+        case 'fahrenheit':
+          return celsius * 9/5 + 32;
+        case 'kelvin':
+          return celsius + 273.15;
+        default:
+          return 0;
+      }
+    };
+
+    const getNextUnit = (currentUnit) => {
+      const units = ['celsius', 'fahrenheit', 'kelvin'];
+      const currentIndex = units.indexOf(currentUnit);
+      return units[(currentIndex + 1) % 3];
+    };
+
+    const formatResult = (value) => {
+      return Math.round(value * 100) / 100; // Round to 2 decimal places
+    };
+
+    // Reset result to default state
+    const resetResult = () => {
+      resultValue.textContent = '--';
+      resultValue.classList.add('no-value');
+      resultUnit.textContent = '--';
+    };
+
+    // Handle conversion (only called on button click or Enter)
+    const handleConversion = () => {
+      const value = tempInput.value;
+      
+      if (!value || isNaN(value) || value === '') {
+        resetResult();
+        return;
+      }
+
+      const fromUnit = unitSelect.value;
+      const toUnit = getNextUnit(fromUnit);
+      
+      const result = convertTemp(value, fromUnit, toUnit);
+      
+      resultValue.textContent = formatResult(result);
+      resultValue.classList.remove('no-value');
+      
+      // Set result unit symbol
+      const unitSymbols = {
+        'celsius': '°C',
+        'fahrenheit': '°F',
+        'kelvin': 'K'
+      };
+      resultUnit.textContent = unitSymbols[toUnit];
+      
+      // Add animation
+      resultSection.classList.add('converted');
+      setTimeout(() => {
+        resultSection.classList.remove('converted');
+      }, 600);
+      
+      // Disable button briefly for visual feedback
+      convertBtn.disabled = true;
+      setTimeout(() => {
+        convertBtn.disabled = false;
+      }, 200);
+    };
+
+    // Event listeners - ONLY button click and Enter key
+    convertBtn.addEventListener('click', handleConversion);
+    
+    // Enter key support on input field
+    tempInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleConversion();
+      }
+    });
+
+    // Reset result when input changes (but don't convert)
+    tempInput.addEventListener('input', resetResult);
+    unitSelect.addEventListener('change', resetResult);
+
+    // Initial state
+    resetResult();
+  </script>
+</body>
+</html>
